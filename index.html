@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulado · Farmacologia do SNA</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap');
+
+  :root{
+    --ink:#1c2333;          /* texto principal */
+    --ink-soft:#5a6478;
+    --paper:#f6f4ef;        /* fundo */
+    --card:#ffffff;
+    --line:#e3e0d8;
+    --simp:#c2562f;         /* simpático - terracota queimado */
+    --simp-soft:#fbeee7;
+    --para:#1f7a6d;         /* parassimpático - teal */
+    --para-soft:#e4f1ee;
+    --accent:#3a4a8c;       /* azul tinta */
+    --accent-soft:#e9ecf7;
+    --right:#1f7a6d;
+    --right-soft:#e4f1ee;
+    --wrong:#bb2d3b;
+    --wrong-soft:#fbe9eb;
+    --shadow:0 1px 2px rgba(28,35,51,.06), 0 8px 24px rgba(28,35,51,.06);
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;background:var(--paper);color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:28px 20px 80px}
+
+  /* ---------- header ---------- */
+  header.top{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:6px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:12px}
+  .axon{flex:none}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:1.5rem;letter-spacing:-.01em;margin:0;line-height:1.1}
+  .sub{color:var(--ink-soft);font-size:.82rem;margin:2px 0 0}
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft)}
+
+  /* ---------- start screen ---------- */
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;box-shadow:var(--shadow)}
+  .panel + .panel{margin-top:16px}
+  .lead{font-size:.95rem;color:var(--ink-soft);margin:0 0 20px}
+  .lead b{color:var(--ink);font-weight:600}
+
+  .field-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 10px}
+  .modes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:22px}
+  .mode{border:1px solid var(--line);border-radius:12px;padding:13px 14px;cursor:pointer;background:#fff;transition:.15s;text-align:left}
+  .mode:hover{border-color:#cfcabd}
+  .mode .mt{font-weight:600;font-size:.92rem}
+  .mode .md{font-size:.78rem;color:var(--ink-soft);margin-top:2px}
+  .mode[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);box-shadow:0 0 0 3px rgba(58,74,140,.12) inset}
+
+  .temas{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+  .chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 13px;font-size:.8rem;cursor:pointer;transition:.15s;font-weight:500;display:inline-flex;align-items:center;gap:7px}
+  .chip:hover{border-color:#cfcabd}
+  .chip .dot{width:8px;height:8px;border-radius:50%;background:var(--ink-soft);flex:none}
+  .chip[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:#fff}
+  .chip[aria-pressed="true"] .dot{background:#fff}
+  .chip .ct{font-variant-numeric:tabular-nums;opacity:.6;font-size:.72rem}
+  .tema-tools{display:flex;gap:14px;margin:12px 0 0;font-size:.8rem}
+  .tema-tools button{background:none;border:none;color:var(--accent);cursor:pointer;font:inherit;padding:0;text-decoration:underline;text-underline-offset:2px}
+
+  .btn{appearance:none;border:none;font:inherit;cursor:pointer;border-radius:12px;font-weight:600;transition:.15s;font-size:.95rem}
+  .btn-primary{background:var(--ink);color:#fff;padding:14px 22px;width:100%;margin-top:22px;display:flex;align-items:center;justify-content:center;gap:9px}
+  .btn-primary:hover{background:#2a3346}
+  .btn-primary:disabled{opacity:.4;cursor:not-allowed}
+
+  /* ---------- quiz ---------- */
+  .hidden{display:none !important}
+  .quizbar{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+  .progress{flex:1;height:6px;background:var(--line);border-radius:999px;overflow:hidden}
+  .progress span{display:block;height:100%;background:var(--accent);width:0;transition:width .3s ease}
+  .counter{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--ink-soft);white-space:nowrap}
+  .counter b{color:var(--ink)}
+  .scorepill{font-family:'JetBrains Mono',monospace;font-size:.78rem;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px 11px;white-space:nowrap}
+  .scorepill b{color:var(--right)}
+
+  .qcard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;box-shadow:var(--shadow)}
+  .qtag{display:inline-flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:999px;margin-bottom:14px;font-weight:600}
+  .qtag .dot{width:7px;height:7px;border-radius:50%}
+  .qcase{font-size:.86rem;color:var(--ink-soft);background:var(--paper);border-left:3px solid var(--line);padding:11px 14px;border-radius:0 8px 8px 0;margin:0 0 14px;font-style:italic}
+  .qtext{font-size:1.08rem;font-weight:500;margin:0 0 18px;line-height:1.45;letter-spacing:-.005em}
+  .qtext .neg{color:var(--simp);font-weight:700}
+
+  .opts{display:flex;flex-direction:column;gap:9px}
+  .opt{display:flex;gap:12px;align-items:flex-start;text-align:left;border:1px solid var(--line);background:#fff;border-radius:11px;padding:13px 15px;cursor:pointer;font:inherit;font-size:.94rem;transition:.13s;width:100%;color:var(--ink)}
+  .opt:hover:not(:disabled){border-color:#c4bfb2;background:#fcfbf8}
+  .opt:disabled{cursor:default}
+  .opt .key{flex:none;width:24px;height:24px;border-radius:7px;border:1px solid var(--line);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:600;color:var(--ink-soft);margin-top:1px;transition:.13s}
+  .opt .otxt{flex:1}
+  .opt.correct{border-color:var(--right);background:var(--right-soft)}
+  .opt.correct .key{background:var(--right);border-color:var(--right);color:#fff}
+  .opt.wrong{border-color:var(--wrong);background:var(--wrong-soft)}
+  .opt.wrong .key{background:var(--wrong);border-color:var(--wrong);color:#fff}
+  .opt.dim{opacity:.55}
+
+  .explain{margin-top:16px;border-radius:11px;padding:14px 16px;font-size:.9rem;line-height:1.5;background:var(--accent-soft);border:1px solid #d4daf0;animation:rise .25s ease}
+  .explain .eh{font-family:'JetBrains Mono',monospace;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:5px}
+  @keyframes rise{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+  .nav{display:flex;gap:10px;margin-top:18px}
+  .btn-ghost{background:#fff;border:1px solid var(--line);color:var(--ink);padding:12px 18px}
+  .btn-ghost:hover{border-color:#c4bfb2;background:#fcfbf8}
+  .btn-next{background:var(--ink);color:#fff;padding:12px 22px;margin-left:auto;display:flex;align-items:center;gap:8px}
+  .btn-next:hover{background:#2a3346}
+  .btn-next:disabled{opacity:.35;cursor:not-allowed}
+
+  /* ---------- results ---------- */
+  .scorebig{font-family:'Fraunces',serif;font-size:3.4rem;font-weight:600;line-height:1;letter-spacing:-.02em}
+  .scorebig small{font-size:1.3rem;color:var(--ink-soft);font-weight:400}
+  .verdict{font-size:1rem;color:var(--ink-soft);margin:8px 0 0}
+  .bytheme{margin-top:22px;display:flex;flex-direction:column;gap:11px}
+  .trow{display:grid;grid-template-columns:1fr auto;gap:6px 12px;align-items:center;font-size:.86rem}
+  .trow .tname{display:flex;align-items:center;gap:8px;font-weight:500}
+  .trow .tname .dot{width:8px;height:8px;border-radius:50%;flex:none}
+  .trow .tscore{font-family:'JetBrains Mono',monospace;color:var(--ink-soft);font-size:.8rem}
+  .tbar{grid-column:1/-1;height:5px;background:var(--line);border-radius:999px;overflow:hidden}
+  .tbar span{display:block;height:100%;border-radius:999px}
+
+  .reviewlist{margin-top:8px;display:flex;flex-direction:column;gap:12px}
+  .rev{border:1px solid var(--line);border-left:3px solid var(--wrong);border-radius:0 11px 11px 0;padding:13px 15px;background:#fff}
+  .rev .rq{font-weight:500;font-size:.9rem;margin:0 0 8px}
+  .rev .rl{font-size:.83rem;margin:3px 0;display:flex;gap:7px}
+  .rev .rl .tag{font-family:'JetBrains Mono',monospace;font-size:.64rem;text-transform:uppercase;letter-spacing:.08em;padding:1px 6px;border-radius:5px;height:fit-content;margin-top:1px;white-space:nowrap}
+  .rev .your .tag{background:var(--wrong-soft);color:var(--wrong)}
+  .rev .corr .tag{background:var(--right-soft);color:var(--right)}
+  .footer{text-align:center;color:var(--ink-soft);font-size:.76rem;margin-top:34px;line-height:1.6}
+  .footer b{color:var(--ink)}
+
+  @media(max-width:560px){
+    .wrap{padding:20px 14px 60px}
+    h1{font-size:1.3rem}
+    .modes{grid-template-columns:1fr}
+    .qcard,.panel{padding:18px}
+    .qtext{font-size:1rem}
+    .scorebig{font-size:2.8rem}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand">
+      <svg class="axon" width="34" height="34" viewBox="0 0 34 34" fill="none" aria-hidden="true">
+        <circle cx="9" cy="17" r="6.5" stroke="#3a4a8c" stroke-width="1.6"/>
+        <path d="M15.5 17 H24" stroke="#5a6478" stroke-width="1.6"/>
+        <circle cx="27" cy="11" r="2.4" fill="#c2562f"/>
+        <circle cx="27" cy="17" r="2.4" fill="#1f7a6d"/>
+        <circle cx="27" cy="23" r="2.4" fill="#c2562f"/>
+        <path d="M24 17 L25 11 M24 17 L25 23" stroke="#5a6478" stroke-width="1.2"/>
+      </svg>
+      <div>
+        <p class="eyebrow">Farmacologia · 2º bimestre</p>
+        <h1>Simulado do Sistema Nervoso Autônomo</h1>
+      </div>
+    </div>
+  </header>
+  <p class="sub" style="margin:0 0 22px;max-width:62ch">Banco montado a partir das suas provas antigas (PA2 e PA4) — adrenérgicos, colinérgicos, bloqueadores α/β e intoxicações. Questões repetidas foram unificadas e as dissertativas viraram objetivas quando o gabarito permitia.</p>
+
+  <!-- ============ START ============ -->
+  <section id="start">
+    <div class="panel">
+      <p class="field-label">Como você quer treinar?</p>
+      <div class="modes">
+        <button class="mode" data-mode="shuffle" aria-pressed="true">
+          <div class="mt">Modo simulado</div>
+          <div class="md">Questões e alternativas embaralhadas</div>
+        </button>
+        <button class="mode" data-mode="ordered" aria-pressed="false">
+          <div class="mt">Ordem do banco</div>
+          <div class="md">Agrupado por tema, sem embaralhar</div>
+        </button>
+      </div>
+
+      <p class="field-label">Temas (toque para filtrar)</p>
+      <div class="temas" id="temas"></div>
+      <div class="tema-tools">
+        <button id="selAll">Marcar todos</button>
+        <button id="selNone">Limpar</button>
+      </div>
+
+      <button class="btn btn-primary" id="startBtn">
+        Começar
+        <span id="startCount" style="font-family:'JetBrains Mono',monospace;font-size:.82rem;opacity:.8"></span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ============ QUIZ ============ -->
+  <section id="quiz" class="hidden">
+    <div class="quizbar">
+      <div class="progress"><span id="bar"></span></div>
+      <div class="counter"><b id="qnum">1</b>/<span id="qtot">0</span></div>
+      <div class="scorepill"><b id="scoreNum">0</b> ✓</div>
+    </div>
+    <div class="qcard">
+      <span class="qtag" id="tag"><span class="dot"></span><span id="tagtxt"></span></span>
+      <p class="qcase hidden" id="case"></p>
+      <p class="qtext" id="qtext"></p>
+      <div class="opts" id="opts"></div>
+      <div id="explain"></div>
+      <div class="nav">
+        <button class="btn btn-ghost hidden" id="restartMid">Recomeçar</button>
+        <button class="btn btn-next" id="nextBtn" disabled>Próxima →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ RESULTS ============ -->
+  <section id="results" class="hidden">
+    <div class="panel">
+      <p class="eyebrow">Resultado</p>
+      <div class="scorebig"><span id="rScore">0</span><small id="rTot">/0</small></div>
+      <p class="verdict" id="verdict"></p>
+      <div class="bytheme" id="byTheme"></div>
+      <button class="btn btn-primary" id="againBtn" style="margin-top:24px">Novo simulado</button>
+    </div>
+    <div class="panel hidden" id="reviewPanel">
+      <p class="field-label" style="margin-bottom:14px">Revisão dos erros</p>
+      <div class="reviewlist" id="reviewList"></div>
+    </div>
+  </section>
+
+  <p class="footer">Fonte: provas antigas de Farmacologia · UniSM/Souza Marques.<br>
+  <b>Material de estudo</b> — confira sempre contra Katzung / Rang &amp; Dale antes da prova.</p>
+</div>
+
+<script>
+/* ============================================================
+   BANCO DE QUESTÕES
+   tema: chave de cor/categoria
+   case: vinheta clínica (opcional)
+   q: enunciado · o: alternativas · a: índice da correta · e: explicação
+   ============================================================ */
+const THEMES = {
+  farmaco: {label:"Farmacodinâmica", color:"#3a4a8c", soft:"#e9ecf7"},
+  modul:   {label:"Modulação adrenérgica", color:"#7a3a8c", soft:"#f1e9f4"},
+  aminas:  {label:"Aminas simpaticomiméticas", color:"#c2562f", soft:"#fbeee7"},
+  beta:    {label:"Bloqueadores β", color:"#b8860b", soft:"#f7efd9"},
+  alfa:    {label:"Bloqueadores α", color:"#a52a4a", soft:"#f7e4ea"},
+  coli:    {label:"Colinérgicos / AChE", color:"#1f7a6d", soft:"#e4f1ee"},
+  anti:    {label:"Antimuscarínicos / Intoxicação", color:"#2f6fb8", soft:"#e4eef9"},
+  diversos:{label:"Casos clínicos / Diversos", color:"#566075", soft:"#ebedf1"}
+};
+
+const BANK = [
+  // ---------------- FARMACODINÂMICA ----------------
+  {tema:"farmaco", q:"Em relação aos diferentes agonistas, marque a alternativa <span class='neg'>INCORRETA</span>:",
+   o:["Agonista total não sinaliza estímulo para a maquinaria celular","Agonista parcial sinaliza pequeno estímulo para a maquinaria celular","A diferença entre agonistas parciais e totais reside na relação entre ocupação e resposta","Agonista inverso tem efeito oposto ao agonista total"],
+   a:0, e:"O agonista total (pleno) sinaliza o estímulo máximo para a maquinaria celular. A frase nega justamente o que define um agonista — por isso é a incorreta."},
+  {tema:"farmaco", q:"Sobre as interações medicamentosas, marque a alternativa <span class='neg'>CORRETA</span>:",
+   o:["Antagonista possui eficácia entre 50 e 100%","No antagonismo competitivo reversível ocorre recuperação do efeito máximo ao se aumentar a concentração do agonista","Agonista parcial possui afinidade apenas pela conformação ativa do receptor","CE50 é diretamente proporcional à potência"],
+   a:1, e:"Antagonismo competitivo reversível desloca a curva para a direita, mas o Emáx é recuperável aumentando-se o agonista (vencível). O antagonista tem eficácia = 0; CE50 é inversamente proporcional à potência."},
+  {tema:"farmaco", q:"Desvio da curva dose-resposta para a direita, com redução da resposta máxima que NÃO é recuperada ao aumentar o agonista. A descrição refere-se ao:",
+   o:["Antagonista competitivo irreversível","Antagonista competitivo reversível","Agonista parcial","Antagonista não competitivo"],
+   a:0, e:"Quando a resposta máxima cai e não se recupera mesmo elevando o agonista, trata-se de antagonismo irreversível (insuperável) — ex.: fenoxibenzamina nos receptores α."},
+  {tema:"farmaco", q:"Sobre a potência de um fármaco, assinale a alternativa <span class='neg'>INCORRETA</span>:",
+   o:["Quanto maior a CE50, menor a potência","Quanto maior a CE50, maior a potência","É a medida da quantidade de fármaco necessária para desencadear determinada resposta","Pode ser matematicamente determinada pela CE50"],
+   a:1, e:"Potência é inversamente proporcional à CE50: quanto MENOR a CE50 (menos fármaco para 50% do efeito), MAIOR a potência."},
+  {tema:"farmaco", q:"A teoria clássica de ocupação dos receptores envolve algumas variáveis, <span class='neg'>EXCETO</span>:",
+   o:["Concentração do agonista","Eficácia extrínseca","Número de receptores","Kd"],
+   a:1, e:"A teoria clássica trabalha com concentração do agonista, número de receptores e Kd. 'Eficácia extrínseca' não é variável dessa teoria."},
+  {tema:"farmaco", q:"Em relação à teoria alostérica, assinale a alternativa <span class='neg'>INCORRETA</span>:",
+   o:["Agonista inverso tem afinidade muito maior pela conformação ativa do receptor","Antagonista tem a mesma afinidade pelas conformações ativa e inativa","Agonista parcial tem afinidade um pouco maior pela conformação ativa","Agonista total tem afinidade muito maior pela conformação ativa"],
+   a:0, e:"O agonista inverso prefere a conformação INATIVA do receptor (reduzindo a atividade constitutiva). Por isso a afirmação está invertida."},
+  {tema:"farmaco", q:"O receptor nicotínico de acetilcolina, que atua na junção neuromuscular promovendo despolarização, é um exemplo de:",
+   o:["Um receptor/canal iônico regulado por ligante","Um receptor acoplado à proteína G regulado por ligante","Um canal iônico regulado por voltagem","Uma enzima extracelular regulada por voltagem"],
+   a:0, e:"O receptor nicotínico é ionotrópico: a ligação da ACh abre o canal iônico (Na+/K+), gerando despolarização rápida."},
+  {tema:"farmaco", q:"Quanto ao receptor colinérgico nicotínico (RnACh), é <span class='neg'>INCORRETO</span> afirmar:",
+   o:["É um receptor metabotrópico","Está na junção neuromuscular, envolvido na contração do músculo esquelético","É alvo de ativação indireta pelos anticolinesterásicos no tratamento da Miastenia gravis","É um receptor do tipo ionotrópico"],
+   a:0, e:"O nicotínico é ionotrópico (canal iônico), não metabotrópico. Metabotrópicos são os muscarínicos (acoplados à proteína G)."},
+
+  // ---------------- MODULAÇÃO ADRENÉRGICA ----------------
+  {tema:"modul", q:"Baseando-se na modulação farmacológica da transmissão adrenérgica, assinale a alternativa <span class='neg'>CORRETA</span>:",
+   o:["Alfa-metiltirosina inibe a liberação de noradrenalina","Reserpina inibe a síntese de noradrenalina","Tranilcipromina inibe a enzima MAO","Anfetamina aumenta a captura-1, reduzindo NA na fenda"],
+   a:2, e:"Tranilcipromina é IMAO. Alfa-metiltirosina inibe a tirosina hidroxilase (síntese); reserpina bloqueia o transportador vesicular; anfetamina inverte a captura, aumentando NA na fenda."},
+  {tema:"modul", q:"Sobre a modulação farmacológica da transmissão adrenérgica, assinale a alternativa <span class='neg'>INCORRETA</span>:",
+   o:["Fenilefrina – agonista seletivo α1","Clonidina – agonista seletivo α2","Dobutamina – agonista seletivo β2","Salbutamol – agonista seletivo β2"],
+   a:2, e:"Dobutamina é agonista seletivo β1 (inotrópico), não β2. As demais associações estão corretas."},
+  {tema:"modul", q:"A ação antihipertensiva da metildopa decorre:",
+   o:["Da inibição do transportador vesicular de monoaminas","Do bloqueio da captura-1","Do bloqueio da captura-2","Da formação de metilnoradrenalina, que é agonista α2 pré-sináptico"],
+   a:3, e:"A metildopa é convertida em α-metilnoradrenalina, um agonista α2 central que reduz o tônus simpático — daí o efeito anti-hipertensivo (falso neurotransmissor)."},
+  {tema:"modul", q:"Assinale um fármaco que afeta a SÍNTESE de noradrenalina:",
+   o:["Anfetamina","Efedrina","Metildopa","Reserpina"],
+   a:2, e:"A metildopa entra na via de síntese e gera α-metilNA (falso transmissor). Reserpina mexe no armazenamento (vesículas), não na síntese."},
+  {tema:"modul", q:"Em relação à selegilina, é correto afirmar:",
+   o:["Inibe a síntese de noradrenalina","É inibidor seletivo da enzima COMT","Inibe a enzima MAO-B","É agonista α1"],
+   a:2, e:"Selegilina é inibidora seletiva da MAO-B, usada no Parkinson; reduz a degradação de dopamina."},
+  {tema:"modul", q:"Qual desses fármacos é capaz de potencializar os efeitos da anfetamina?",
+   o:["Imipramina","Atenolol","Reserpina","Tranilcipromina"],
+   a:3, e:"A tranilcipromina (IMAO) impede a degradação das catecolaminas; somada à anfetamina (que libera NA), o efeito adrenérgico é amplificado — risco de crise hipertensiva."},
+  {tema:"modul", q:"Agonistas α2, como a clonidina, agem:",
+   o:["Reduzindo a liberação de neurotransmissores, como a noradrenalina","Inibindo a degradação das catecolaminas","Aumentando a liberação de noradrenalina","Inibindo a síntese de catecolaminas"],
+   a:0, e:"O α2 pré-sináptico é autorreceptor inibitório: sua ativação reduz a liberação de NA (feedback negativo), diminuindo o tônus simpático."},
+  {tema:"modul", q:"Assinale o fármaco que NÃO interfere com a liberação de noradrenalina pelas terminações nervosas pós-ganglionares:",
+   o:["Prazosin","Clonidina","Anfetamina","Propranolol"],
+   a:0, e:"Prazosin é antagonista α1 pós-sináptico — bloqueia o efeito da NA, mas não interfere na sua liberação. Clonidina (↓libera), anfetamina (↑libera) e propranolol (efeito pré-sináptico) atuam sobre a liberação."},
+  {tema:"modul", q:"A transmissão adrenérgica é EXACERBADA em uma das condições abaixo. Assinale-a:",
+   o:["Estimulação de receptores α2 pré-sinápticos","Inibição de receptores β pré-sinápticos","Bloqueio competitivo da captação neuronal da noradrenalina","Inibição da enzima tirosina hidroxilase"],
+   a:2, e:"Bloquear a recaptação neuronal (captura-1) deixa mais NA na fenda — efeito tipo cocaína, que exacerba a transmissão adrenérgica."},
+  {tema:"modul", q:"Estudante usou metilfenidato para concentrar nos estudos. Sobre o mecanismo do metilfenidato, é correto afirmar:",
+   case:"B.V., 20 anos, estudante de medicina.",
+   o:["Aumenta a síntese de NA no terminal nervoso","Além de aumentar NA por inibir a captura-1 pré-sináptica, atua em receptores adrenérgicos","Impede que a NA seja recaptada pela captura-1 nas células pós-sinápticas","Bloqueia a captura-2 pós-sináptica"],
+   a:1, e:"O metilfenidato inibe a recaptação (captura-1) pré-sináptica de NA/dopamina e tem ação simpatomimética indireta, atuando em receptores adrenérgicos."},
+  {tema:"modul", q:"Quanto à ioimbina, está correto afirmar que:",
+   o:["É um antagonista β1","É um agonista α2","É um antagonista α2","É um agonista α1"],
+   a:2, e:"Ioimbina é antagonista α2 — ao bloquear o autorreceptor, aumenta a liberação de NA."},
+  {tema:"modul", q:"Em relação à clonidina, assinale a alternativa <span class='neg'>INCORRETA</span>:",
+   o:["Aumenta o tônus vagal","Causa ativação do sistema nervoso simpático e aumenta a liberação de noradrenalina","Pode ser indicada como anti-hipertensivo","Pode provocar sensação de boca seca e sedação"],
+   a:1, e:"A clonidina (α2-agonista central) REDUZ o tônus simpático e a liberação de NA — o oposto do que a frase diz."},
+  {tema:"modul", q:"A toxina botulínica atua sobre a sinapse colinérgica. Seu mecanismo é:",
+   o:["Bloqueio dos receptores nicotínicos da placa motora","Impedir a exocitose das vesículas que liberam acetilcolina no terminal pré-sináptico","Inibição irreversível da acetilcolinesterase","Agonismo muscarínico de ação prolongada"],
+   a:1, e:"A toxina botulínica não se liga a receptor: ela bloqueia a fusão/exocitose das vesículas de ACh no terminal pré-sináptico, impedindo a liberação do neurotransmissor."},
+
+  // ---------------- AMINAS SIMPATICOMIMÉTICAS ----------------
+  {tema:"aminas", q:"O isoproterenol provoca os seguintes efeitos:",
+   o:["Bradicardia e broncoespasmo","Bradicardia e retenção urinária","Taquicardia e hipertensão","Taquicardia e broncodilatação"],
+   a:3, e:"Isoproterenol é agonista β não seletivo (β1+β2): β1 → taquicardia; β2 → broncodilatação."},
+  {tema:"aminas", q:"Em relação às aminas simpaticomiméticas, assinale a alternativa <span class='neg'>INCORRETA</span>:",
+   o:["A adrenalina produz vasoconstrição em pele e mucosas","A adrenalina aumenta a excitabilidade cardíaca atuando em β1","A noradrenalina não apresenta ação vasodilatadora","A adrenalina produz broncodilatação atuando em receptores β1"],
+   a:3, e:"A broncodilatação da adrenalina ocorre via β2, não β1. As demais estão corretas."},
+  {tema:"aminas", q:"Em relação às aminas simpaticomiméticas, assinale a alternativa <span class='neg'>INCORRETA</span>:",
+   o:["Baixas doses de dopamina produzem vasodilatação renal e mesentérica","A dobutamina age aumentando a contratilidade cardíaca","A dopamina atua em receptores β2","A tiramina pode aumentar a PA em associação a inibidores da MAO"],
+   a:2, e:"A dopamina atua em receptores D1, α e β1 (conforme a dose), mas não em β2. As demais afirmações estão corretas."},
+  {tema:"aminas", q:"Dentre as drogas abaixo, assinale a mais vasoconstritora:",
+   o:["Fenilefrina","Terbutalina","Albuterol","Isoprenalina"],
+   a:0, e:"Fenilefrina é agonista α1 puro → vasoconstrição potente. As demais são β-agonistas (sem vasoconstrição)."},
+  {tema:"aminas", q:"Assinale um efeito da dopamina em baixas doses (< 5 µg/kg/min):",
+   o:["Efeito inotrópico e cronotrópico positivos","Aumento do fluxo sanguíneo renal","Aumento da resistência vascular periférica","Vasoconstrição coronariana"],
+   a:1, e:"Em dose baixa predomina o efeito dopaminérgico (D1) → vasodilatação renal e mesentérica, aumentando o fluxo renal. β1 (inotropismo) surge em doses intermediárias; α1 (RVP↑) em doses altas."},
+  {tema:"aminas", q:"Paciente chega à emergência com hipotensão grave. Dentre as drogas abaixo, qual seria a melhor escolha?",
+   o:["Isoproterenol","Noradrenalina","Prazosin","Adrenalina"],
+   a:1, e:"Na hipotensão grave/choque distributivo, a noradrenalina (α1 potente + β1) é o vasopressor de escolha, elevando a PA por vasoconstrição."},
+  {tema:"aminas", q:"Após acidente de carro com hemorragia por ruptura de fígado e choque circulatório, controlada a hemorragia e reposta a volemia, a PA não melhorou. Qual fármaco é a melhor opção para elevar a PA?",
+   case:"PAS de 50 mmHg, sinais de choque circulatório.",
+   o:["Dobutamina","Isoproterenol","Epinefrina","Norepinefrina"],
+   a:3, e:"Após reposição volêmica sem resposta, a norepinefrina é a primeira escolha como vasopressor para sustentar a PA."},
+  {tema:"aminas", q:"Paciente com insuficiência cardíaca crônica dá entrada com sinais de baixo débito, PA normal e descompensação. Assinale a amina simpaticomimética mais indicada:",
+   case:"S.M., feminino, 32 anos, IC crônica descompensada, PA normal.",
+   o:["Fenilefrina","Noradrenalina","Dobutamina","Salbutamol"],
+   a:2, e:"Baixo débito com PA preservada pede inotrópico: dobutamina (β1) aumenta a contratilidade sem o componente vasoconstritor da NA."},
+  {tema:"aminas", q:"Quanto ao uso das aminas simpaticomiméticas em situação emergencial de reação de hipersensibilidade com choque anafilático, qual o fármaco de escolha?",
+   o:["Fenilefrina","Dopamina","Dobutamina","Adrenalina"],
+   a:3, e:"A adrenalina é a 1ª escolha no choque anafilático: α1 (vasoconstrição/edema), β1 (inotropismo) e β2 (broncodilatação) atacam todos os componentes."},
+  {tema:"aminas", q:"Qual fármaco, administrado por via IV, reduz o fluxo para a pele, aumenta o fluxo para os músculos esqueléticos e provoca inotropismo e cronotropismo positivos?",
+   o:["Adrenalina","Noradrenalina","Isoproterenol","Fenilefrina"],
+   a:0, e:"Esse perfil misto (α na pele = vasoconstrição; β2 no músculo = vasodilatação; β1 = ino/cronotropismo) é da adrenalina."},
+  {tema:"aminas", q:"Qual dos fármacos abaixo é capaz de causar hipotensão postural?",
+   o:["Noradrenalina","Tranilcipromina","Adrenalina","Prazosin"],
+   a:3, e:"Prazosin (antagonista α1) bloqueia a vasoconstrição compensatória ao ficar de pé → hipotensão postural (efeito 'primeira dose')."},
+  {tema:"aminas", q:"Em relação à modulação da transmissão adrenérgica, assinale a alternativa <span class='neg'>CORRETA</span>:",
+   o:["Adrenalina e noradrenalina aumentam a velocidade de condução do nodo AV","Adrenalina e noradrenalina são usadas por via oral","Adrenalina e noradrenalina têm T½ prolongado","Adrenalina é mais vasopressora que noradrenalina"],
+   a:0, e:"Ambas têm efeito dromotrópico positivo (aceleram a condução AV) via β1. Catecolaminas têm meia-vida curta e não são usadas VO; a NA é mais vasopressora que a adrenalina."},
+  {tema:"aminas", q:"Um estudante depara-se com a matéria de modulação adrenérgica. Assinale a alternativa <span class='neg'>CORRETA</span>:",
+   o:["A metildopa inibe a captação vesicular de dopamina e noradrenalina","A reserpina aumenta a captação vesicular da noradrenalina","A efedrina é uma catecolamina endógena","O isoproterenol é mais eficaz que a norepinefrina nos receptores β-adrenérgicos"],
+   a:3, e:"Isoproterenol é β-agonista puro e mais eficaz que a NA nos receptores β. Reserpina BLOQUEIA a captação vesicular; efedrina não é catecolamina endógena."},
+  {tema:"aminas", q:"Qual dos seguintes fármacos pode estar presente em medicamentos contra a congestão nasal?",
+   o:["Salbutamol","Clonidina","Albuterol","Fenilefrina"],
+   a:3, e:"Fenilefrina (α1) provoca vasoconstrição da mucosa nasal → descongestionante."},
+  {tema:"aminas", q:"Qual dos fármacos abaixo pode provocar aumento do diâmetro pupilar atuando em receptor α-adrenérgico?",
+   o:["Propranolol","Terbutalina","Salbutamol","Fenilefrina"],
+   a:3, e:"Fenilefrina (α1) contrai o músculo radial da íris → midríase (usada como midriático tópico)."},
+  {tema:"aminas", q:"Em relação à fenilefrina, marque a alternativa <span class='neg'>INCORRETA</span>:",
+   o:["Pode ser indicada como midriático em formulações oftálmicas","Taquicardia e hipotensão são os efeitos adversos mais comuns","É um agonista α1 seletivo de ação direta","Pode provocar aumento de RVP"],
+   a:1, e:"Fenilefrina (α1) causa HIPERTENSÃO e bradicardia REFLEXA — o oposto de 'taquicardia e hipotensão'."},
+  {tema:"aminas", q:"Qual fármaco seria melhor indicado para uma gestante em trabalho de parto prematuro?",
+   o:["Fenilefrina","Terbutalina","Mirabegrona","Dobutamina"],
+   a:1, e:"Terbutalina (β2-agonista) relaxa o miométrio → tocólise, usada para inibir o parto prematuro."},
+  {tema:"aminas", q:"V.C., 17 anos, em festa, usou anfetamina como estimulante do SNC e apresentou efeitos periféricos. Assinale o ÚNICO efeito que NÃO poderia apresentar:",
+   case:"V.C., 17 anos, uso recreativo de anfetamina.",
+   o:["Aumento da contração cardíaca","Relaxamento dos esfíncteres","Midríase","Aumento da pressão arterial"],
+   a:1, e:"A anfetamina (simpatomimética) CONTRAI os esfíncteres (α1) → retenção urinária; não os relaxa. Causa ino/cronotropismo, midríase e hipertensão."},
+  {tema:"aminas", q:"Qual das seguintes ações da adrenalina é bloqueada pelo prazosin?",
+   o:["Liberação de renina","Midríase","Dilatação brônquica","Aumento da glicemia"],
+   a:1, e:"Prazosin bloqueia α1. A midríase da adrenalina depende de α1 (músculo radial), por isso é bloqueada. As demais são β-mediadas."},
+
+  // ---------------- BLOQUEADORES BETA ----------------
+  {tema:"beta", q:"Sobre as possíveis indicações dos bloqueadores β-adrenérgicos, marque a resposta <span class='neg'>INCORRETA</span>:",
+   o:["Controle dos sintomas agudos do pânico","Arritmias cardíacas","Insuficiência cardíaca descompensada","Profilaxia da enxaqueca"],
+   a:2, e:"β-bloqueadores são úteis na IC crônica estável, mas são CONTRAINDICADOS na IC descompensada (efeito inotrópico negativo agrava o quadro)."},
+  {tema:"beta", q:"Em relação aos efeitos cardiovasculares dos bloqueadores β-adrenérgicos, marque a resposta <span class='neg'>CORRETA</span>:",
+   o:["Reduz a condução A-V","Aumenta o consumo de oxigênio pelo miocárdio","Aumenta a pressão arterial","Aumenta o inotropismo e o cronotropismo"],
+   a:0, e:"β-bloqueadores reduzem a condução AV (dromotrópico negativo), além de reduzir FC, contratilidade, consumo de O2 e PA."},
+  {tema:"beta", q:"São bloqueadores β-adrenérgicos não seletivos de primeira geração, <span class='neg'>EXCETO</span>:",
+   o:["Propranolol","Timolol","Atenolol","Nadolol"],
+   a:2, e:"Atenolol é β1-seletivo (2ª geração / cardiosseletivo). Propranolol, timolol e nadolol são não seletivos de 1ª geração."},
+  {tema:"beta", q:"São exemplos de usos clínicos dos bloqueadores β-adrenérgicos, <span class='neg'>EXCETO</span>:",
+   o:["Pré-operatório de feocromocitoma","Hipotireoidismo","Profilaxia de sangramento por varizes esofágicas na hipertensão portal","Glaucoma"],
+   a:1, e:"β-bloqueadores são usados no HIPERtireoidismo (controle adrenérgico), não no hipotireoidismo."},
+  {tema:"beta", q:"Deve-se evitar o uso de bloqueador β-adrenérgico nos casos abaixo, <span class='neg'>EXCETO</span>:",
+   o:["PAS < 100 mmHg","Bradicardia importante (FC < 60 bpm)","DPOC","Profilaxia da enxaqueca"],
+   a:3, e:"A profilaxia da enxaqueca é justamente uma INDICAÇÃO (propranolol). Os demais são contraindicações."},
+  {tema:"beta", q:"Paciente diabético em uso de insulina, com cefaleia e PA = 190×120 mmHg (HAS). Assinale a alternativa <span class='neg'>INCORRETA</span>:",
+   case:"R.C.V., diabético, insulinodependente.",
+   o:["Deve-se evitar anti-hipertensivo que provoque glicogenólise/gliconeogênese","Propranolol seria a melhor opção por ser seletivo","Pode-se associar anti-hipertensivo ao esquema de insulinização","Um diurético é opção, pois reduz a volemia e a PA"],
+   a:1, e:"Propranolol NÃO é seletivo (atua em β1 e β2). Em diabético, ainda mascara sintomas de hipoglicemia (β1) e atrasa a recuperação glicêmica (β2)."},
+  {tema:"beta", q:"Assinale a alternativa que apresenta um bloqueador β-adrenérgico não seletivo:",
+   o:["Atenolol","Celiprolol","Propranolol","Labetalol"],
+   a:2, e:"Propranolol é o protótipo do β-bloqueador não seletivo. Atenolol e celiprolol são β1-seletivos; labetalol também bloqueia α1."},
+  {tema:"beta", q:"Dentre os bloqueadores adrenérgicos usados na HAS, qual pertence ao grupo dos CARDIOSSELETIVOS?",
+   o:["Metoprolol","Propranolol","Celiprolol","Carvedilol"],
+   a:0, e:"Metoprolol é β1-seletivo (cardiosseletivo). Propranolol é não seletivo e carvedilol bloqueia α+β."},
+  {tema:"beta", q:"A respeito dos antagonistas β-adrenérgicos, assinale a alternativa <span class='neg'>INCORRETA</span>:",
+   o:["Devem ser evitados em bradicardia importante (FC < 60 bpm)","Antagonistas β-adrenérgicos são contraindicados no tratamento da angina pectoris","Labetalol, antagonista β não seletivo, também bloqueia receptores α1","Bradicardia pode ser efeito colateral do bloqueio β1"],
+   a:1, e:"β-bloqueadores são amplamente USADOS na angina (reduzem consumo miocárdico de O2). Dizer que são contraindicados é incorreto."},
+  {tema:"beta", q:"Marque a alternativa <span class='neg'>INCORRETA</span> a respeito dos antagonistas β-adrenérgicos:",
+   o:["Indução de enzimas microssomais reduz o efeito anti-hipertensivo do propranolol","Atenolol, antagonista β1 seletivo, pode reduzir a liberação de renina plasmática","Carvedilol, antagonista β não seletivo, também bloqueia receptores α1","Prefere-se os antagonistas β2 seletivos em pacientes hipertensos e asmáticos"],
+   a:3, e:"Não existe β-bloqueador 'β2 seletivo' de uso clínico — em asmático prefere-se β1-seletivo, para poupar o β2 brônquico. A frase está incorreta."},
+  {tema:"beta", q:"Em relação à farmacologia dos bloqueadores β-adrenérgicos não seletivos, assinale a alternativa <span class='neg'>CORRETA</span>:",
+   o:["Propranolol, por não ser lipossolúvel, não dá distúrbios do sono","São contraindicados em taquiarritmias do hipertireoidismo","Todos são excretados exclusivamente por via renal in natura","O uso crônico pode produzir hipersensibilidade dos receptores, devendo ser retirado gradativamente para evitar efeito rebote"],
+   a:3, e:"A suspensão abrupta causa efeito rebote (up-regulation dos receptores β) → retirar gradualmente. Propranolol É lipossolúvel (causa insônia/pesadelos)."},
+  {tema:"beta", q:"Representa um efeito colateral dos bloqueadores β não seletivos que NÃO é compartilhado pelos seletivos β1:",
+   o:["Bradicardia","Bloqueio átrio-ventricular","Broncoespasmo","Redução do inotropismo"],
+   a:2, e:"O broncoespasmo decorre do bloqueio β2 brônquico — exclusivo dos não seletivos. Bradicardia, BAV e ↓inotropismo são β1 (comuns aos dois)."},
+  {tema:"beta", q:"Assinale a sequência que retrata, respectivamente: maior lipossolubilidade · excreção renal in natura · atividade simpaticomimética intrínseca (ASI):",
+   o:["Propranolol, nadolol, pindolol","Atenolol, propranolol, sotalol","Propranolol, sotalol, nadolol","Esmolol, propranolol, labetalol"],
+   a:0, e:"Propranolol = mais lipossolúvel; nadolol = excretado intacto pelos rins; pindolol = β-bloqueador com ASI clássica."},
+  {tema:"beta", q:"O efeito anti-hipertensivo dos β-bloqueadores NÃO depende de:",
+   o:["Redução da renina plasmática","Bradicardia","Elevação da RVP","Queda do débito cardíaco"],
+   a:2, e:"O efeito anti-hipertensivo vem de ↓renina, ↓DC e ação central — NÃO de elevar a RVP (que, se ocorre, é transitória e indesejável)."},
+  {tema:"beta", q:"D.U.C. relata que, ao se apresentar em público, sente muita taquicardia e tremores, e que um remédio antes das apresentações evitaria essas sensações. Ao interpretar a situação, marque a alternativa <span class='neg'>CORRETA</span>:",
+   case:"Sintomas adrenérgicos situacionais (ansiedade de desempenho).",
+   o:["Taquicardia é sintoma agudo do pânico que poderia ser controlado com propranolol","É um caso de emergência psiquiátrica grave","O 'remédio' poderia ser adrenalina, eficaz no controle de tremores e taquicardia","Sintomas agudos do pânico não respondem ao tratamento medicamentoso"],
+   a:0, e:"Os sintomas adrenérgicos periféricos (taquicardia/tremor) do pânico de desempenho são bem controlados com propranolol (β-bloqueio)."},
+  {tema:"beta", q:"Por que o cardiologista trocou propranolol por atenolol num hipertenso que evoluiu com asma brônquica (sibilos, dispneia)?",
+   case:"Masculino, 38 anos, hipertenso em propranolol, desenvolveu asma.",
+   o:["O atenolol é não seletivo e melhora a asma","O propranolol é β1-seletivo e o atenolol bloqueia β2","O propranolol bloqueia β2 e piora a asma; o atenolol é β1-seletivo e poupa o β2 brônquico","O atenolol tem efeito broncodilatador direto"],
+   a:2, e:"Propranolol (não seletivo) bloqueia β2 → broncoconstrição/piora da asma. Atenolol é β1-seletivo: poupa o β2 das vias aéreas."},
+  {tema:"beta", q:"Criança de 4 anos com asma brônquica agudizada, em uso de Aerolin® (salbutamol) inalado. Sobre a escolha, assinale a <span class='neg'>CORRETA</span>:",
+   case:"P.C.P., 4 anos, crises de asma com dispneia e tosse.",
+   o:["Salbutamol foi escolhido por ser β-agonista não seletivo com efeitos sistêmicos importantes","A melhor opção na emergência seria um de meia-vida longa, como fenoterol","A alta absorção sistêmica do salbutamol leva a tremores e taquicardia, contraindicando-o","O salbutamol é agonista β2 seletivo, indicado pelo efeito broncodilatador"],
+   a:3, e:"Salbutamol é β2-seletivo de ação rápida → broncodilatador de escolha na crise asmática. A via inalatória minimiza efeitos sistêmicos."},
+
+  // ---------------- BLOQUEADORES ALFA ----------------
+  {tema:"alfa", q:"É considerado efeito dos fármacos antagonistas dos receptores α1:",
+   o:["Piora do perfil lipídico","Vasodilatação arteriolar e venosa","Bradicardia","Contração da musculatura lisa na próstata e bexiga"],
+   a:1, e:"Antagonistas α1 (prazosin) causam vasodilatação arteriolar e venosa → queda da PA. Relaxam (não contraem) a musculatura prostática/vesical."},
+  {tema:"alfa", q:"Analise as afirmativas sobre fármacos que atuam nos receptores α-adrenérgicos e assinale a <span class='neg'>CORRETA</span>:",
+   o:["Prazosin, bloqueador α1 seletivo, pode ser indicado na HAS","Prazosin, bloqueador não seletivo, é contraindicado na Síndrome de Raynaud","Doxazosina é um agonista útil na congestão nasal","Fentolamina, bloqueador α1 seletivo, é contraindicada no feocromocitoma"],
+   a:0, e:"Prazosin é α1-seletivo e é opção no tratamento da HAS. Os demais itens têm erros (Raynaud usa α-bloqueio; doxazosina é antagonista; fentolamina é usada no feocromocitoma)."},
+  {tema:"alfa", q:"Sobre os bloqueadores α-adrenérgicos, assinale a alternativa <span class='neg'>CORRETA</span>:",
+   o:["Prazosin é frequentemente utilizado como broncodilatador","Aumentam a resistência vascular periférica","Fentolamina é bloqueador α1 seletivo irreversível","São opções no tratamento da hipertensão"],
+   a:3, e:"α-bloqueadores são opções anti-hipertensivas. Eles REDUZEM a RVP; fentolamina é não seletiva e reversível; prazosin não é broncodilatador."},
+  {tema:"alfa", q:"Paciente com feocromocitoma usava Prazosin, mas os picos hipertensivos continuaram; trocado por fenoxibenzamina, controlou a PA, porém passou a apresentar como efeito adverso frequente:",
+   case:"Sr. T.N.T., 28 anos, feocromocitoma.",
+   o:["Taquicardia (reflexa)","Retenção urinária","Midríase","Bradicardia"],
+   a:0, e:"A fenoxibenzamina (α-bloqueio potente e irreversível, α1+α2) provoca taquicardia reflexa, agravada pelo bloqueio α2 pré-sináptico (↑liberação de NA)."},
+  {tema:"alfa", q:"A fenoxibenzamina é a droga de escolha no preparo pré-operatório do feocromocitoma porque:",
+   o:["Tem ligação irreversível com os receptores α-adrenérgicos","É melhor absorvida por via oral","Tem menos efeitos colaterais","Seus efeitos são revertidos com aumento do agonista"],
+   a:0, e:"O bloqueio α irreversível (insuperável) garante controle estável da PA mesmo com as descargas maciças de catecolaminas do tumor durante a cirurgia."},
+  {tema:"alfa", q:"A hiperplasia prostática benigna acomete ~50% dos homens acima de 50 anos. Dentre os fármacos abaixo, qual é indicado para o tratamento da HPB?",
+   o:["Clonidina","Ioimbina","Tamsulosina","Carvedilol"],
+   a:2, e:"Tamsulosina é α1-bloqueador uroseletivo (α1A prostático): relaxa a musculatura lisa uretroprostática, melhorando o fluxo urinário."},
+  {tema:"alfa", q:"Assinale o bloqueador α-adrenérgico ideal no tratamento da hiperplasia prostática benigna:",
+   o:["Ergotamina","Prazosin","Tamsulosina","Ioimbina"],
+   a:2, e:"Tamsulosina atua preferencialmente nos receptores α1A prostáticos (vs α1B vascular), com menos hipotensão — o 'α-bloqueador ideal' na HPB."},
+  {tema:"alfa", q:"Sobre os bloqueadores α-adrenérgicos, marque a resposta <span class='neg'>CORRETA</span>:",
+   o:["Fentolamina, bloqueador α competitivo seletivo, é mais utilizada que o prazosin","São a primeira escolha em monoterapia na HAS","Contraindicados na HPB por aumentar a resistência ao fluxo urinário","Fenoxibenzamina provoca maior efeito cronotrópico devido ao bloqueio da captação 1 e 2"],
+   a:3, e:"A fenoxibenzamina bloqueia α1+α2; o bloqueio α2 pré-sináptico aumenta a liberação de NA, gerando maior taquicardia (cronotropismo) reflexa."},
+
+  // ---------------- COLINÉRGICOS / AChE ----------------
+  {tema:"coli", q:"Qual dos seguintes efeitos é característico da estimulação PARASSIMPÁTICA?",
+   o:["Diminuição da motilidade intestinal","Contração do esfíncter muscular da íris (miose)","Inibição da secreção brônquica","Contração do esfíncter da bexiga urinária"],
+   a:1, e:"O parassimpático causa miose (contração do esfíncter da íris), aumenta motilidade e secreções e relaxa o esfíncter vesical (favorece micção)."},
+  {tema:"coli", q:"Em relação aos efeitos dos agonistas colinérgicos, assinale a alternativa <span class='neg'>INCORRETA</span>:",
+   o:["Induzem aumento de secreção glandular","Induzem vasodilatação via óxido nítrico","Induzem miose e redução da pressão intraocular","Causam retenção urinária"],
+   a:3, e:"Agonistas colinérgicos contraem o detrusor e relaxam o esfíncter → favorecem a MICÇÃO (não retenção). Por isso a frase é incorreta."},
+  {tema:"coli", q:"A metacolina produz seu efeito bradicardizante através de qual mecanismo de ação?",
+   o:["Ativação da proteína Gq","Ativação de canais de potássio via proteína G","Abertura de canais iônicos inespecíficos","Aumento de cálcio intracelular via proteína Gs"],
+   a:1, e:"Receptor M2 cardíaco acopla-se à Gi, que abre canais de K+ (hiperpolarização) → bradicardia."},
+  {tema:"coli", q:"A ativação de receptores muscarínicos M2 resulta em:",
+   o:["Redução da liberação de acetilcolina","Secreção de ácido clorídrico","Vasodilatação","Cronotropismo positivo"],
+   a:0, e:"M2 (autorreceptor pré-sináptico e cardíaco) reduz a liberação de ACh e diminui a FC. Secreção de HCl é M1/M3; vasodilatação é M3 (endotélio)."},
+  {tema:"coli", q:"Em relação aos fármacos anticolinesterásicos, assinale a alternativa <span class='neg'>CORRETA</span>:",
+   o:["Neostigmina não reverte bloqueio neuromuscular por curare","Edrofônio é usado no tratamento da miastenia gravis","Ecotiofato é inibidor reversível da acetilcolinesterase","Fisostigmina pode provocar bradicardia e hipotensão"],
+   a:3, e:"Fisostigmina ↑ACh → efeitos muscarínicos (bradicardia, hipotensão). Neostigmina REVERTE curare; edrofônio é para DIAGNÓSTICO; ecotiofato é IRREVERSÍVEL."},
+  {tema:"coli", q:"Qual exemplo corresponde à utilização do edrofônio, um inibidor da colinesterase?",
+   o:["Tratamento do glaucoma","Tratamento da retenção urinária","Diagnóstico da miastenia gravis","Controle da xerostomia pós-radiação"],
+   a:2, e:"O edrofônio tem ação ultracurta → usado como 'droga-teste' no diagnóstico da miastenia gravis (melhora transitória da força)."},
+  {tema:"coli", q:"Quanto ao ecotiofato, está correto afirmar que:",
+   o:["É agonista colinérgico de ação direta, seletivamente muscarínico","É agonista colinérgico de ação indireta","É antagonista colinérgico","É agonista de ação direta, seletivamente nicotínico"],
+   a:1, e:"Ecotiofato é organofosforado → anticolinesterásico (ação indireta), aumentando a ACh disponível."},
+  {tema:"coli", q:"Assinale a alternativa <span class='neg'>CORRETA</span> em relação às drogas colinomiméticas:",
+   o:["São indicadas no Alzheimer por reduzirem os níveis de acetilcolina","Os anticolinesterásicos são indicados na miastenia gravis","Intoxicação grave por organofosforados causa delírio por serem hidrossolúveis","Betanecol é contraindicado no íleo adinâmico"],
+   a:1, e:"Anticolinesterásicos (piridostigmina/neostigmina) aumentam ACh na junção neuromuscular → tratamento da miastenia. No Alzheimer eles AUMENTAM ACh; betanecol é indicado no íleo adinâmico."},
+  {tema:"coli", q:"Está contraindicado o uso de anticolinesterásico nas seguintes condições, <span class='neg'>EXCETO</span>:",
+   o:["Doença acidopéptica","Hipertireoidismo","Asma","Atonia de bexiga"],
+   a:3, e:"A atonia de bexiga é INDICAÇÃO de anticolinesterásico/colinomimético (estimula a micção). Asma, doença acidopéptica e hipertireoidismo são contraindicações."},
+  {tema:"coli", q:"Em relação aos anticolinesterásicos, é correto afirmar:",
+   o:["O ecotiofato é utilizado no Mal de Alzheimer","A neostigmina é utilizada no tratamento do íleo paralítico","Edrofônio promove fosforilação do centro ativo da acetilcolinesterase","Pralidoxima e atropina são usadas na intoxicação pela neostigmina"],
+   a:1, e:"A neostigmina (↑ACh, ↑peristaltismo) é usada no íleo paralítico/atonia vesical pós-operatória."},
+  {tema:"coli", q:"Paciente com glaucoma recebe colírio cujo objetivo é aumentar a drenagem do humor aquoso, reduzindo a PIO. Assinale o fármaco e o receptor-alvo correspondentes:",
+   case:"Diagnóstico de glaucoma; meta = ↑drenagem do humor aquoso.",
+   o:["Escopolamina, receptor nicotínico N1","Atropina, receptor nicotínico N2","Atropina, receptor nicotínico N1","Pilocarpina, receptor M3"],
+   a:3, e:"Pilocarpina (agonista muscarínico) contrai o músculo ciliar/esfíncter via M3 → abre a malha trabecular e aumenta a drenagem, reduzindo a PIO."},
+  {tema:"coli", q:"Sobre os carbamatos (ex.: aldicarbe, 'chumbinho'), é correto afirmar que:",
+   o:["Inibem irreversivelmente a acetilcolinesterase","Inibem reversivelmente a acetilcolinesterase (complexo carbamilado menos estável)","Não têm antídoto disponível","Atuam apenas em receptores nicotínicos"],
+   a:1, e:"Carbamatos formam complexo carbamilado MENOS estável → inibição reversível da AChE (recuperação mais rápida que nos organofosforados)."},
+  {tema:"coli", q:"Sra. M.R.R., 25 anos, com fraqueza muscular progressiva; o edrofônio resgatou a força (miastenia gravis). Sobre a abordagem terapêutica, assinale a <span class='neg'>CORRETA</span>:",
+   case:"M.R.R., 25 anos, miastenia gravis confirmada com edrofônio.",
+   o:["A piridostigmina deve ser usada em associação à atropina nesse esquema","Tratamento com apenas um colinomimético de ação direta sobre receptores muscarínicos","A melhora com edrofônio indica não ser miastenia gravis","A fraqueza é agravada por bloqueador muscarínico"],
+   a:0, e:"A piridostigmina (anticolinesterásico) trata a miastenia; associa-se atropina para controlar os efeitos muscarínicos colaterais, preservando a ação nicotínica na placa motora."},
+
+  // ---------------- ANTIMUSCARÍNICOS / INTOXICAÇÃO ----------------
+  {tema:"anti", q:"Quanto ao ipratrópio, é correto afirmar que:",
+   o:["É antagonista irreversível dos receptores nicotínicos","É antagonista reversível seletivo dos muscarínicos M1","É agonista total dos muscarínicos","É antagonista reversível dos receptores colinérgicos muscarínicos"],
+   a:3, e:"Ipratrópio é antimuscarínico (antagonista reversível dos receptores muscarínicos), usado por via inalatória como broncodilatador."},
+  {tema:"anti", q:"Em relação ao ipratrópio, assinale a alternativa <span class='neg'>CORRETA</span>:",
+   o:["Tem alta biodisponibilidade por via oral","Pode ser utilizado no tratamento da Doença de Parkinson","Apresenta altas concentrações no SNC após uso IV","Pode ser administrado por via inalatória para efeito local"],
+   a:3, e:"Por ser amônio quaternário (pouco absorvido/sem passar a barreira), o ipratrópio é dado por inalação, agindo localmente nas vias aéreas com poucos efeitos sistêmicos."},
+  {tema:"anti", q:"Em relação à escopolamina (bloqueador muscarínico), é correto afirmar:",
+   o:["Aumenta a secreção gástrica","Pode aumentar a pressão intraocular","Provoca miose","Reduz a frequência cardíaca"],
+   a:1, e:"Como antimuscarínico, a escopolamina pode aumentar a PIO (risco no glaucoma de ângulo fechado), causa midríase, reduz secreções e tende à taquicardia."},
+  {tema:"anti", q:"Os bloqueadores colinérgicos (muscarínicos) podem provocar:",
+   o:["Redução da frequência cardíaca","Aumento dos movimentos peristálticos","Midríase","Aumento da secreção gástrica"],
+   a:2, e:"Antimuscarínicos causam midríase, taquicardia, redução do peristaltismo e das secreções (boca seca)."},
+  {tema:"anti", q:"A atropina pode causar:",
+   o:["Miose","Constipação","Broncoconstrição","Bloqueio muscular"],
+   a:1, e:"A atropina (antimuscarínico) reduz a motilidade GI → constipação, além de midríase, taquicardia, xerostomia e retenção urinária."},
+  {tema:"anti", q:"Os antimuscarínicos devem ser evitados em pacientes com:",
+   o:["Diarreia","Asma","Úlcera péptica","Glaucoma"],
+   a:3, e:"Antimuscarínicos causam midríase e podem elevar a PIO → contraindicados no glaucoma (sobretudo de ângulo fechado)."},
+  {tema:"anti", q:"Atropina e escopolamina bloqueiam os efeitos da ACh. Dentre os efeitos abaixo, quais são corretamente bloqueados? I. secreção salivar · II. broncoconstrição · III. contração da musculatura esquelética · IV. miose",
+   o:["I, III e IV somente","Apenas I e III","I, II e III somente","I, II e IV somente"],
+   a:3, e:"Atropina/escopolamina bloqueiam efeitos MUSCARÍNICOS: salivação (I), broncoconstrição (II) e miose (IV). A contração do músculo esquelético (III) é NICOTÍNICA e não é bloqueada por antimuscarínicos."},
+  {tema:"anti", q:"São contraindicações do uso de atropina, <span class='neg'>EXCETO</span>:",
+   o:["Taquicardia supraventricular","Glaucoma","Bloqueio átrio-ventricular","Retenção urinária"],
+   a:2, e:"A atropina é justamente USADA no bloqueio AV/bradicardia. As demais (taquicardia, glaucoma, retenção urinária, íleo) são contraindicações."},
+  {tema:"anti", q:"O uso de um anti-espasmódico (atropínico) para tratar dor abdominal pode acarretar:",
+   o:["Aceleração do esvaziamento gástrico","Esvaziamento da bexiga","Redução do peristaltismo","Aumento da secreção gástrica"],
+   a:2, e:"Antimuscarínicos reduzem o peristaltismo (efeito anti-espasmódico desejado), mas podem causar retenção urinária e xerostomia."},
+  {tema:"anti", q:"Homem de 32 anos intoxicou-se acidentalmente com o carbamato aldicarbe ('chumbinho'). As manifestações clínicas dessa intoxicação aguda são:",
+   case:"K.D.V.C., masculino, 32 anos, intoxicação por carbamato.",
+   o:["Sudorese, salivação intensa, cólicas abdominais e dispneia","Vômitos, diarreia, xerostomia e midríase","Visão turva, constipação, delírios e hiperemia","Confusão mental, rubor cutâneo, taquicardia e hipertensão"],
+   a:0, e:"Excesso colinérgico (síndrome muscarínica – SLUDGE): sudorese, sialorreia, cólicas, broncorreia/dispneia, miose. Xerostomia/midríase/constipação seriam o oposto (anticolinérgico)."},
+  {tema:"anti", q:"Em paciente intoxicado por cogumelos do gênero <i>Amanita muscaria</i>, assinale o efeito IMPROVÁVEL:",
+   o:["Hipotensão","Diarreia","Broncoespasmo","Abalos da musculatura esquelética"],
+   a:3, e:"A muscarina ativa receptores MUSCARÍNICOS (hipotensão, diarreia, broncoespasmo, sudorese). Abalos da musculatura esquelética são efeito NICOTÍNICO → improvável aqui."},
+  {tema:"anti", q:"Na intoxicação por organofosforados, a seguinte conduta deve ser adotada:",
+   o:["Lavagem gástrica e carbacol em altas doses","Lavagem gástrica e atropina em doses baixas","Administração de pralidoxima e de atropina em doses altas","Lavagem da pele e carbacol em doses baixas"],
+   a:2, e:"Tratamento dos organofosforados: ATROPINA em doses altas (bloqueia efeitos muscarínicos) + PRALIDOXIMA (reativa a AChE antes do 'envelhecimento')."},
+  {tema:"anti", q:"Menina de 11 anos deu entrada por intoxicação por 'chumbinho' (aldicarbe). Assinale a opção <span class='neg'>INCORRETA</span>:",
+   case:"Intoxicação por carbamato (aldicarbe).",
+   o:["Usa-se atropina para corrigir os efeitos muscarínicos exacerbados","Os efeitos nicotínicos na musculatura esquelética não são revertidos pela atropina","A pralidoxima é indicada para reverter a inibição da AChE pelos carbamatos","O aldicarbe é um inibidor reversível da acetilcolinesterase"],
+   a:2, e:"A pralidoxima NÃO é indicada na intoxicação por CARBAMATOS — a inibição já é reversível e a oxima pode até prejudicar. Pralidoxima é para organofosforados."},
+  {tema:"anti", q:"Trabalhador rural intoxicado por inseticida organofosforado (malation), em uso de atropina. Qual substância é empregada em associação à atropina?",
+   case:"J.C.A., 29 anos, intoxicação acidental por organofosforado.",
+   o:["Pilocarpina","Anfetamina","Carbacol","Pralidoxima"],
+   a:3, e:"A pralidoxima reativa a acetilcolinesterase fosforilada (revertendo a inibição/fasciculações nicotínicas), enquanto a atropina cobre os efeitos muscarínicos."},
+  {tema:"anti", q:"Sobre o caso do malation (atropina 2 mg IV + pralidoxima 1 g IV), o papel de cada fármaco é:",
+   case:"Agricultor 22 anos: miose, bradicardia, sialorreia, fasciculações.",
+   o:["Atropina reativa a AChE; pralidoxima bloqueia receptores muscarínicos","Atropina bloqueia efeitos muscarínicos; pralidoxima reativa a AChE e reduz as fasciculações","Ambas reativam a acetilcolinesterase","Ambas bloqueiam receptores nicotínicos da placa motora"],
+   a:1, e:"Atropina = antimuscarínico (reverte miose, bradicardia, sialorreia). Pralidoxima = reativa a AChE, reduzindo a ACh e as fasciculações nicotínicas da placa motora."},
+
+  // ---------------- CASOS CLÍNICOS / DIVERSOS ----------------
+  {tema:"diversos", q:"Crise hipertensiva por interação entre tranilcipromina (IMAO não seletivo irreversível) e alto nível sistêmico de tiramina. Assinale a alternativa <span class='neg'>INCORRETA</span> sobre a conduta:",
+   case:"F.L.K., 32 anos, motorista, crise hipertensiva.",
+   o:["A tiramina deixou de ser metabolizada pela MAO e atingiu a circulação com efeito tipo anfetamina","Seria contraindicado o uso de bloqueadores α-adrenérgicos no tratamento da crise","Poderia ser indicado um bloqueador α1 seletivo, como o prazosin","O quadro seria minimizado se o IMAO fosse seletivo e reversível"],
+   a:1, e:"O α-bloqueio (prazosin) é justamente uma boa opção para a crise (vasodilatação, ↓RVP). Dizer que seria contraindicado é incorreto."},
+  {tema:"diversos", q:"Adolescente que ingeriu 5 comprimidos de fenobarbital evoluiu com depressão do SNC, hipotermia, bradipneia e hipotensão. Assinale a alternativa correta:",
+   case:"17 anos, intoxicação por fenobarbital (barbitúrico).",
+   o:["Os barbitúricos são mais seguros que os benzodiazepínicos","Os barbitúricos são menos seguros que os benzodiazepínicos","Barbitúricos têm antagonista específico de uso comum","Barbitúricos apresentam efeito teto bem definido"],
+   a:1, e:"Barbitúricos são MENOS seguros: não têm efeito teto, não têm antagonista prático e a intoxicação leva à depressão cardiorrespiratória fatal. Por isso foram substituídos pelos benzodiazepínicos."},
+  {tema:"diversos", q:"A respeito da modulação farmacológica da excitação cardíaca, assinale a resposta <span class='neg'>INCORRETA</span>:",
+   o:["Antiarrítmicos classe III bloqueiam canais de K+ e atuam na repolarização (fase 3)","Antiarrítmicos classe III reduzem o período refratário e a duração do PA","Antiarrítmicos classe III aumentam o período refratário","Antiarrítmicos classe III prolongam a duração do potencial de ação"],
+   a:1, e:"Classe III bloqueiam canais de K+ → prolongam a repolarização, AUMENTANDO a duração do PA e o período refratário (não reduzindo)."},
+  {tema:"diversos", q:"Em relação aos fármacos que atuam no músculo liso, assinale a alternativa <span class='neg'>INCORRETA</span>:",
+   o:["Inibidores da fosfodiesterase inibem a enzima que degrada o AMPc","O efeito relaxante vascular dos inibidores da fosfodiesterase ocorre por diminuição do AMPc","O aumento de AMPc impede a fosforilação da cadeia leve de miosina","O resultado é relaxamento vascular"],
+   a:1, e:"Inibir a fosfodiesterase AUMENTA o AMPc (não diminui) → relaxamento vascular. A frase inverte o mecanismo."},
+  {tema:"diversos", q:"Lactente de 1 ano com diarreia há 3 dias; a mãe (que amamenta) está em uso de cefalexina por otite média. Assinale a alternativa correta:",
+   case:"Masculino, 1 ano, em aleitamento; mãe usando cefalexina.",
+   o:["Não é possível identificar qualquer causa para o quadro","A cefalexina da lactante pode passar para o leite e alterar a flora intestinal do lactente, justificando a diarreia","A melhor conduta seria prescrever antibiótico ao lactente","O quadro não tem relação com a medicação materna"],
+   a:1, e:"Fármacos podem ser excretados no leite materno; a cefalexina pode alterar a microbiota intestinal do lactente, justificando a diarreia."},
+  {tema:"diversos", q:"Sobre a interação entre rifampicina e contraceptivos orais, assinale a <span class='neg'>INCORRETA</span>:",
+   o:["A rifampicina aumenta a biotransformação dos contraceptivos","A rifampicina afeta a biodisponibilidade dos contraceptivos","A rifampicina inibe as enzimas do sistema microssomal hepático","A interação não é farmacodinâmica"],
+   a:2, e:"A rifampicina é INDUTORA enzimática (não inibidora) — acelera o metabolismo dos contraceptivos, reduzindo sua eficácia. Por isso a frase é incorreta."},
+  {tema:"diversos", q:"Sobre o uso combinado de broncodilatadores na asma/DPOC, qual associação é apropriada para uso na urgência?",
+   o:["Salmeterol + formoterol","Ipratrópio + fenoterol","Tiotrópio + salmeterol","Tiotrópio + formoterol"],
+   a:1, e:"Ipratrópio (antimuscarínico de início rápido) + fenoterol (β2 de ação rápida) servem na urgência. Salmeterol/formoterol têm início lento (alta latência); tiotrópio é de longa duração."},
+  {tema:"diversos", q:"DPOC agudizado em UTI, recebeu ipratrópio. Sobre a escolha em relação ao tiotrópio, assinale a <span class='neg'>CORRETA</span>:",
+   case:"A.B., 69 anos, tabagista, DPOC agudizado.",
+   o:["Ipratrópio tem ação mais longa que o tiotrópio","Ipratrópio tem menor meia-vida que o tiotrópio, sendo usado em emergências","Ipratrópio tem menor meia-vida e, portanto, mais efeitos colaterais","Neste caso deveria ser usado tiotrópio"],
+   a:1, e:"O ipratrópio tem menor meia-vida/início mais rápido que o tiotrópio (longa duração) → preferível na agudização/emergência."},
+  {tema:"diversos", q:"Em relação ao mirabegrona, usado na incontinência urinária por hiperatividade da bexiga, assinale a <span class='neg'>CORRETA</span>:",
+   o:["Age em receptor α2 no detrusor, relaxando-o","Relaxa o músculo detrusor atuando em receptor β3","Atua em α1 contraindo o esfíncter interno","Relaxa o detrusor por atuar em receptor α1"],
+   a:1, e:"Mirabegrona é agonista β3 do detrusor → relaxa o músculo da parede vesical, aumentando a capacidade e reduzindo a urgência."}
+];
+
+/* ============================================================
+   ESTADO + LÓGICA
+   ============================================================ */
+let state = { mode:"shuffle", themes:new Set(Object.keys(THEMES)), queue:[], idx:0, score:0, wrong:[] };
+
+const $ = s => document.querySelector(s);
+
+// contagem por tema
+const counts = {};
+Object.keys(THEMES).forEach(k => counts[k] = BANK.filter(q=>q.tema===k).length);
+
+// ---- montar chips de tema ----
+const temasEl = $("#temas");
+Object.entries(THEMES).forEach(([k,t])=>{
+  const b=document.createElement("button");
+  b.className="chip"; b.dataset.theme=k; b.setAttribute("aria-pressed","true");
+  b.innerHTML=`<span class="dot" style="background:${t.color}"></span>${t.label}<span class="ct">${counts[k]}</span>`;
+  b.onclick=()=>{ const on=b.getAttribute("aria-pressed")==="true"; b.setAttribute("aria-pressed",String(!on));
+    if(on) state.themes.delete(k); else state.themes.add(k); updateStartCount(); };
+  temasEl.appendChild(b);
+});
+
+// ---- modos ----
+document.querySelectorAll(".mode").forEach(m=>{
+  m.onclick=()=>{ document.querySelectorAll(".mode").forEach(x=>x.setAttribute("aria-pressed","false"));
+    m.setAttribute("aria-pressed","true"); state.mode=m.dataset.mode; };
+});
+
+$("#selAll").onclick=()=>{ document.querySelectorAll(".chip").forEach(c=>{c.setAttribute("aria-pressed","true");state.themes.add(c.dataset.theme)}); updateStartCount(); };
+$("#selNone").onclick=()=>{ document.querySelectorAll(".chip").forEach(c=>{c.setAttribute("aria-pressed","false")}); state.themes.clear(); updateStartCount(); };
+
+function selectedCount(){ return BANK.filter(q=>state.themes.has(q.tema)).length; }
+function updateStartCount(){
+  const n=selectedCount();
+  $("#startCount").textContent = n? `· ${n} questões` : "";
+  $("#startBtn").disabled = n===0;
+}
+updateStartCount();
+
+// ---- iniciar ----
+$("#startBtn").onclick=start;
+function start(){
+  let qs = BANK.map((q,i)=>({...q,_id:i})).filter(q=>state.themes.has(q.tema));
+  if(state.mode==="shuffle"){
+    qs = shuffle(qs).map(q=>{
+      const opts = q.o.map((t,i)=>({t,correct:i===q.a}));
+      const sh = shuffle(opts);
+      return {...q, o:sh.map(x=>x.t), a:sh.findIndex(x=>x.correct)};
+    });
+  } else {
+    const order=Object.keys(THEMES);
+    qs.sort((a,b)=>order.indexOf(a.tema)-order.indexOf(b.tema));
+  }
+  state.queue=qs; state.idx=0; state.score=0; state.wrong=[];
+  $("#start").classList.add("hidden"); $("#results").classList.add("hidden"); $("#quiz").classList.remove("hidden");
+  $("#qtot").textContent=qs.length; $("#scoreNum").textContent="0";
+  $("#restartMid").classList.remove("hidden");
+  render(); window.scrollTo(0,0);
+}
+
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+
+// ---- render questão ----
+function render(){
+  const q=state.queue[state.idx];
+  const th=THEMES[q.tema];
+  $("#qnum").textContent=state.idx+1;
+  $("#bar").style.width=((state.idx)/state.queue.length*100)+"%";
+  const tag=$("#tag"); tag.style.background=th.soft; tag.style.color=th.color;
+  tag.querySelector(".dot").style.background=th.color;
+  $("#tagtxt").textContent=th.label;
+
+  const caseEl=$("#case");
+  if(q.case){ caseEl.textContent=q.case; caseEl.classList.remove("hidden"); }
+  else caseEl.classList.add("hidden");
+
+  $("#qtext").innerHTML=q.q;
+  $("#explain").innerHTML="";
+  const opts=$("#opts"); opts.innerHTML="";
+  const keys=["A","B","C","D","E"];
+  q.o.forEach((txt,i)=>{
+    const b=document.createElement("button");
+    b.className="opt";
+    b.innerHTML=`<span class="key">${keys[i]}</span><span class="otxt">${txt}</span>`;
+    b.onclick=()=>answer(i,b);
+    opts.appendChild(b);
+  });
+  const next=$("#nextBtn"); next.disabled=true;
+  next.textContent = state.idx===state.queue.length-1 ? "Ver resultado" : "Próxima →";
+}
+
+// ---- responder ----
+function answer(i,btn){
+  const q=state.queue[state.idx];
+  const allBtns=[...$("#opts").children];
+  if(allBtns[0].disabled) return;
+  allBtns.forEach((b,j)=>{
+    b.disabled=true;
+    if(j===q.a) b.classList.add("correct");
+    else if(j===i) b.classList.add("wrong");
+    else b.classList.add("dim");
+  });
+  const correct = i===q.a;
+  if(correct){ state.score++; $("#scoreNum").textContent=state.score; }
+  else state.wrong.push({q, your:i, idx:state.idx});
+
+  const th=THEMES[q.tema];
+  const ex=$("#explain");
+  ex.innerHTML=`<div class="explain" style="background:${correct?'var(--right-soft)':th.soft};border-color:${correct?'#bfe0d8':'#dcdcdc'}">
+      <div class="eh" style="color:${correct?'var(--right)':th.color}">${correct?'Correto':'Gabarito · '+['A','B','C','D','E'][q.a]}</div>
+      ${q.e}</div>`;
+  $("#nextBtn").disabled=false;
+  $("#nextBtn").focus();
+}
+
+// ---- avançar ----
+$("#nextBtn").onclick=()=>{
+  if(state.idx<state.queue.length-1){ state.idx++; render(); window.scrollTo({top:0,behavior:"smooth"}); }
+  else finish();
+};
+$("#restartMid").onclick=()=>{ if(confirm("Recomeçar e voltar à tela inicial?")){ $("#quiz").classList.add("hidden"); $("#start").classList.remove("hidden"); window.scrollTo(0,0);} };
+
+// ---- resultado ----
+function finish(){
+  $("#bar").style.width="100%";
+  $("#quiz").classList.add("hidden"); $("#results").classList.remove("hidden");
+  const tot=state.queue.length, sc=state.score, pct=Math.round(sc/tot*100);
+  $("#rScore").textContent=sc; $("#rTot").textContent="/"+tot;
+  let v;
+  if(pct>=85) v="Excelente — domínio sólido do conteúdo.";
+  else if(pct>=70) v="Bom desempenho. Reveja os erros abaixo e fecha o ciclo.";
+  else if(pct>=50) v="Na média. Vale refazer focando nos temas mais fracos.";
+  else v="Hora de revisar a base antes de simular de novo.";
+  $("#verdict").textContent=`${pct}% de acerto. ${v}`;
+
+  // por tema
+  const bt=$("#byTheme"); bt.innerHTML="";
+  Object.keys(THEMES).forEach(k=>{
+    const qs=state.queue.filter(q=>q.tema===k);
+    if(!qs.length) return;
+    const right=qs.filter(q=>!state.wrong.some(w=>w.q===q)).length;
+    const p=Math.round(right/qs.length*100); const th=THEMES[k];
+    const row=document.createElement("div"); row.className="trow";
+    row.innerHTML=`<div class="tname"><span class="dot" style="background:${th.color}"></span>${th.label}</div>
+      <div class="tscore">${right}/${qs.length}</div>
+      <div class="tbar"><span style="width:${p}%;background:${th.color}"></span></div>`;
+    bt.appendChild(row);
+  });
+
+  // revisão dos erros
+  const rp=$("#reviewPanel"), rl=$("#reviewList"); rl.innerHTML="";
+  if(state.wrong.length){
+    rp.classList.remove("hidden");
+    state.wrong.forEach(w=>{
+      const keys=["A","B","C","D","E"];
+      const d=document.createElement("div"); d.className="rev"; d.style.borderLeftColor=THEMES[w.q.tema].color;
+      d.innerHTML=`<p class="rq">${w.q.case?`<em style="color:var(--ink-soft);font-weight:400">${w.q.case}</em><br>`:""}${w.q.q}</p>
+        <div class="rl your"><span class="tag">Você</span><span>${keys[w.your]}) ${w.q.o[w.your]}</span></div>
+        <div class="rl corr"><span class="tag">Correta</span><span>${keys[w.q.a]}) ${w.q.o[w.q.a]}</span></div>
+        <div style="font-size:.82rem;color:var(--ink-soft);margin-top:8px">${w.q.e}</div>`;
+      rl.appendChild(d);
+    });
+  } else rp.classList.add("hidden");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+$("#againBtn").onclick=()=>{ $("#results").classList.add("hidden"); $("#start").classList.remove("hidden"); window.scrollTo(0,0); };
+</script>
+</body>
+</html>
